@@ -597,7 +597,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
             // Elementos da interface
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
@@ -665,12 +665,8 @@
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     const tabId = tab.getAttribute('data-tab');
-                    
-                    // Remover classe active de todas as abas e conteúdos
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(tc => tc.classList.remove('active'));
-                    
-                    // Adicionar classe active à aba e conteúdo clicados
                     tab.classList.add('active');
                     document.getElementById(`${tabId}-tab`).classList.add('active');
                 });
@@ -691,7 +687,9 @@
                 const date = expenseDate.value;
                 const category = expenseCategory.value;
                 const description = expenseDescription.value.trim();
-                const value = parseFloat(expenseValue.value);
+                // Aceita vírgula ou ponto como separador decimal
+                let valueStr = expenseValue.value.replace(',', '.');
+                const value = parseFloat(valueStr);
                 
                 if (!date || !category || !description || isNaN(value) || value <= 0) {
                     showToast('Por favor, preencha todos os campos corretamente.');
@@ -713,23 +711,19 @@
                 // Limpar campos
                 expenseDescription.value = '';
                 expenseValue.value = '';
+                expenseDate.value = todayFormatted;
                 
-                // Mostrar mensagem de sucesso
                 showToast('Gasto adicionado com sucesso!');
-                
-                // Focar no campo de descrição
                 expenseDescription.focus();
             }
             
             // Função para definir limite diário
             function setDailyLimit() {
-                const limit = parseFloat(dailyLimit.value);
-                
+                const limit = parseFloat(dailyLimit.value.replace(',', '.'));
                 if (isNaN(limit) || limit <= 0) {
                     showToast('Por favor, informe um valor válido para o limite diário.');
                     return;
                 }
-                
                 dailyLimitValue = limit;
                 localStorage.setItem('dailyLimit', dailyLimitValue.toString());
                 updateLimitUI();
@@ -739,12 +733,11 @@
             // Função para salvar limites por categoria
             function saveCategoryLimits() {
                 categoryLimits = {
-                    Supermercado: parseFloat(document.getElementById('supermarketLimit').value) || 0,
-                    'Almoço/Jantar': parseFloat(document.getElementById('foodLimit').value) || 0,
-                    Transporte: parseFloat(document.getElementById('transportLimit').value) || 0,
-                    Lazer: parseFloat(document.getElementById('leisureLimit').value) || 0
+                    Supermercado: parseFloat(document.getElementById('supermarketLimit').value.replace(',', '.')) || 0,
+                    'Almoço/Jantar': parseFloat(document.getElementById('foodLimit').value.replace(',', '.')) || 0,
+                    Transporte: parseFloat(document.getElementById('transportLimit').value.replace(',', '.')) || 0,
+                    Lazer: parseFloat(document.getElementById('leisureLimit').value.replace(',', '.')) || 0
                 };
-                
                 localStorage.setItem('categoryLimits', JSON.stringify(categoryLimits));
                 updateLimitsSummary();
                 showToast('Limites por categoria salvos com sucesso!');
@@ -753,16 +746,12 @@
             // Função para carregar dados do localStorage
             function loadFromLocalStorage() {
                 const storedData = localStorage.getItem('expensesData');
-                if (storedData) {
-                    expensesData = JSON.parse(storedData);
-                }
-                
+                if (storedData) expensesData = JSON.parse(storedData);
                 const storedLimit = localStorage.getItem('dailyLimit');
                 if (storedLimit) {
                     dailyLimitValue = parseFloat(storedLimit);
                     dailyLimit.value = dailyLimitValue;
                 }
-                
                 const storedCategoryLimits = localStorage.getItem('categoryLimits');
                 if (storedCategoryLimits) {
                     categoryLimits = JSON.parse(storedCategoryLimits);
@@ -790,9 +779,7 @@
             // Função para atualizar gastos de hoje
             function updateTodayExpenses() {
                 const todayExpenses = expensesData.filter(expense => expense.date === todayFormatted);
-                
                 todayExpensesBody.innerHTML = '';
-                
                 if (todayExpenses.length === 0) {
                     todayExpensesBody.innerHTML = `
                         <tr>
@@ -807,13 +794,11 @@
                 } else {
                     todayExpenses.forEach(expense => {
                         const row = document.createElement('tr');
-                        
                         row.innerHTML = `
                             <td>${expense.category}</td>
                             <td>${expense.description}</td>
                             <td class="negative">R$ ${expense.value.toFixed(2)}</td>
                         `;
-                        
                         todayExpensesBody.appendChild(row);
                     });
                 }
@@ -824,34 +809,18 @@
                 const month = monthFilter.value;
                 const year = yearFilter.value;
                 const category = categoryFilter.value;
-                
-                // Filtrar dados
                 let filteredData = [...expensesData];
-                
                 if (month) {
-                    filteredData = filteredData.filter(expense => {
-                        const expenseMonth = expense.date.split('-')[1];
-                        return expenseMonth === month;
-                    });
+                    filteredData = filteredData.filter(expense => expense.date.split('-')[1] === month);
                 }
-                
                 if (year) {
-                    filteredData = filteredData.filter(expense => {
-                        const expenseYear = expense.date.split('-')[0];
-                        return expenseYear === year;
-                    });
+                    filteredData = filteredData.filter(expense => expense.date.split('-')[0] === year);
                 }
-                
                 if (category) {
                     filteredData = filteredData.filter(expense => expense.category === category);
                 }
-                
-                // Ordenar por data (mais recente primeiro)
                 filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                // Atualizar tabela
                 historyBody.innerHTML = '';
-                
                 if (filteredData.length === 0) {
                     historyBody.innerHTML = `
                         <tr>
@@ -866,11 +835,8 @@
                 } else {
                     filteredData.forEach(expense => {
                         const row = document.createElement('tr');
-                        
-                        // Formatar data para exibição
                         const dateObj = new Date(expense.date);
                         const formattedDate = dateObj.toLocaleDateString('pt-BR');
-                        
                         row.innerHTML = `
                             <td>${formattedDate}</td>
                             <td>${expense.category}</td>
@@ -882,7 +848,6 @@
                                 </button>
                             </td>
                         `;
-                        
                         historyBody.appendChild(row);
                     });
                 }
@@ -891,36 +856,26 @@
             // Função para atualizar o resumo financeiro
             function updateSummary() {
                 const todayExpenses = expensesData.filter(expense => expense.date === todayFormatted);
-                
-                // Calcular totais
                 const total = todayExpenses.reduce((sum, expense) => sum + expense.value, 0);
                 const highest = todayExpenses.length > 0 ? Math.max(...todayExpenses.map(expense => expense.value)) : 0;
-                
                 totalExpensesElement.textContent = `R$ ${total.toFixed(2)}`;
                 highestExpenseElement.textContent = `R$ ${highest.toFixed(2)}`;
             }
             
             // Função para atualizar a UI do limite diário
             function updateLimitUI() {
-                // Calcular gastos de hoje
                 const todayExpenses = expensesData
                     .filter(expense => expense.date === todayFormatted)
                     .reduce((sum, expense) => sum + expense.value, 0);
-                
                 todayExpensesElement.textContent = `R$ ${todayExpenses.toFixed(2)}`;
                 limitTextElement.textContent = `Limite: R$ ${dailyLimitValue.toFixed(2)}`;
-                
-                // Calcular porcentagem do limite
                 let percentage = 0;
                 if (dailyLimitValue > 0) {
                     percentage = (todayExpenses / dailyLimitValue) * 100;
-                    percentage = Math.min(percentage, 100); // Máximo de 100%
+                    percentage = Math.min(percentage, 100);
                 }
-                
                 limitProgressElement.style.width = `${percentage}%`;
                 progressTextElement.textContent = `${percentage.toFixed(0)}% do limite`;
-                
-                // Alterar cor com base na porcentagem
                 if (percentage >= 100) {
                     limitProgressElement.className = 'progress danger';
                     limitCardElement.className = 'card limit-card';
@@ -936,20 +891,16 @@
             // Função para atualizar o resumo dos limites
             function updateLimitsSummary() {
                 const limitsSummary = document.getElementById('limitsSummary');
-                
                 if (Object.keys(categoryLimits).length === 0) {
                     limitsSummary.innerHTML = '<p>Nenhum limite definido ainda.</p>';
                     return;
                 }
-                
                 let html = '';
                 for (const [category, limit] of Object.entries(categoryLimits)) {
                     if (limit > 0) {
-                        // Calcular gastos do mês atual para esta categoria
                         const currentMonth = new Date().getMonth() + 1;
                         const monthStr = currentMonth.toString().padStart(2, '0');
                         const currentYear = new Date().getFullYear().toString();
-                        
                         const monthlyExpenses = expensesData
                             .filter(expense => {
                                 const expenseDate = new Date(expense.date);
@@ -958,9 +909,7 @@
                                        expense.category === category;
                             })
                             .reduce((sum, expense) => sum + expense.value, 0);
-                        
                         const percentage = (monthlyExpenses / limit) * 100;
-                        
                         html += `
                             <div style="margin-bottom: 15px;">
                                 <p><strong>${category}:</strong> R$ ${monthlyExpenses.toFixed(2)} / R$ ${limit.toFixed(2)}</p>
@@ -972,7 +921,6 @@
                         `;
                     }
                 }
-                
                 limitsSummary.innerHTML = html || '<p>Nenhum limite definido ainda.</p>';
             }
             
@@ -996,13 +944,10 @@
                     localStorage.removeItem('expensesData');
                     localStorage.removeItem('dailyLimit');
                     localStorage.removeItem('categoryLimits');
-                    
-                    // Limpar campos de limites
                     document.getElementById('supermarketLimit').value = '';
                     document.getElementById('foodLimit').value = '';
                     document.getElementById('transportLimit').value = '';
                     document.getElementById('leisureLimit').value = '';
-                    
                     updateUI();
                     showToast('Todos os dados foram limpos!');
                 }
@@ -1014,28 +959,21 @@
                     showToast('Não há dados para exportar.');
                     return;
                 }
-                
-                // Criar conteúdo CSV
-                let csvContent = "Data,Categoria,Descrição,Valor\n";
-                
+                // Usar ponto e vírgula como separador de colunas
+                let csvContent = "Data;Categoria;Descrição;Valor\n";
                 expensesData.forEach(expense => {
-                    csvContent += `"${expense.date}","${expense.category}","${expense.description}",${expense.value}\n`;
+                    csvContent += `"${expense.date}";"${expense.category}";"${expense.description}";${expense.value.toFixed(2).replace('.', ',')}\n`;
                 });
-                
-                // Cri
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement("a");
                 const date = new Date().toISOString().split('T')[0];
-                
                 link.setAttribute("href", url);
                 link.setAttribute("download", `gastos_${date}.csv`);
                 link.style.visibility = 'hidden';
-                
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                
                 showToast('Dados exportados com sucesso!');
             }
             
@@ -1044,7 +982,6 @@
                 const toast = document.getElementById('toast');
                 toast.textContent = message;
                 toast.style.opacity = '1';
-                
                 setTimeout(() => {
                     toast.style.opacity = '0';
                 }, 3000);
