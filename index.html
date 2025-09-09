@@ -4,73 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Gastos Pessoais</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
         
         body {
             background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
-            padding: 20px;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0;
         }
         
         header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
+            padding: 20px 15px;
             background: linear-gradient(135deg, #2c3e50, #4a6491);
             color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: 700;
         }
         
         .subtitle {
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             opacity: 0.9;
+            font-weight: 400;
         }
         
-        .main-content {
+        /* Abas de navegação */
+        .tabs {
             display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 84px;
+            z-index: 90;
         }
         
-        .left-column, .right-column {
+        .tab {
             flex: 1;
-            min-width: 300px;
+            text-align: center;
+            padding: 15px 0;
+            font-weight: 600;
+            color: #4a6491;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid #4a6491;
+            color: #2c3e50;
+        }
+        
+        .tab i {
+            margin-right: 5px;
+            font-size: 1.1rem;
+        }
+        
+        /* Conteúdo das abas */
+        .tab-content {
+            display: none;
+            padding: 20px 15px;
+            min-height: calc(100vh - 140px);
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         .section {
             background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
         }
         
         h2 {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             color: #2c3e50;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.3rem;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -80,88 +116,86 @@
             color: #4a6491;
         }
         
-        .drop-area {
-            border: 3px dashed #4a6491;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 20px;
-            transition: all 0.3s;
-            cursor: pointer;
+        .form-group {
+            margin-bottom: 15px;
         }
         
-        .drop-area:hover {
-            background-color: #f0f8ff;
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
         }
         
-        .drop-area p {
-            margin-top: 10px;
-            color: #4a6491;
-            font-weight: 500;
-        }
-        
-        .file-input {
-            display: none;
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            -webkit-appearance: none;
         }
         
         .btn {
-            display: inline-block;
+            display: block;
+            width: 100%;
             background: #4a6491;
             color: white;
-            padding: 12px 25px;
+            padding: 16px;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1.1rem;
             font-weight: 600;
             transition: background 0.3s;
-            margin-top: 10px;
+            text-align: center;
         }
         
-        .btn:hover {
+        .btn:active {
             background: #2c3e50;
-        }
-        
-        .btn-danger {
-            background: #e74c3c;
-        }
-        
-        .btn-danger:hover {
-            background: #c0392b;
+            transform: scale(0.98);
         }
         
         .btn-success {
             background: #2ecc71;
         }
         
-        .btn-success:hover {
+        .btn-success:active {
             background: #27ae60;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .btn-danger:active {
+            background: #c0392b;
         }
         
         .summary-cards {
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
+            flex-direction: column;
+            gap: 12px;
             margin-bottom: 20px;
         }
         
         .card {
-            flex: 1;
-            min-width: 150px;
             background: linear-gradient(135deg, #4a6491, #2c3e50);
             color: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 18px;
+            border-radius: 12px;
             text-align: center;
         }
         
         .card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
         
         .card p {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: bold;
         }
         
@@ -175,109 +209,6 @@
         
         .limit-card.warning {
             background: linear-gradient(135deg, #f39c12, #e67e22);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        th {
-            background-color: #4a6491;
-            color: white;
-        }
-        
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .filter-item {
-            flex: 1;
-            min-width: 200px;
-        }
-        
-        .filter-item label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .filter-item input, .filter-item select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        
-        .negative {
-            color: #e74c3c;
-        }
-        
-        .positive {
-            color: #2ecc71;
-        }
-        
-        .instructions {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 0.9rem;
-        }
-        
-        .instructions h3 {
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-        
-        .instructions ul {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .actions button {
-            flex: 1;
         }
         
         .progress-bar {
@@ -307,160 +238,363 @@
             text-align: center;
             font-weight: 600;
             margin-top: 5px;
+            font-size: 0.9rem;
         }
         
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .summary-cards {
-                flex-direction: column;
-            }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #4a6491;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            max-height: 400px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .negative {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .positive {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .actions button {
+            flex: 1;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px 0;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+        
+        /* Safe areas para iPhone */
+        .safe-area-top {
+            padding-top: env(safe-area-inset-top);
+        }
+        
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
+    <div class="safe-area-top"></div>
     <div class="container">
         <header>
             <h1>Controle de Gastos Pessoais</h1>
-            <p class="subtitle">Adicione gastos, defina limites e acompanhe suas despesas</p>
+            <p class="subtitle">Acompanhe seus gastos e defina limites</p>
         </header>
         
-        <div class="main-content">
-            <div class="left-column">
-                <section class="section">
-                    <h2><i class="fas fa-plus-circle"></i> Adicionar Gasto</h2>
-                    <div class="form-group">
-                        <label for="expenseDate">Data:</label>
-                        <input type="date" id="expenseDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="expenseCategory">Categoria:</label>
-                        <select id="expenseCategory">
-                            <option value="Supermercado">Supermercado</option>
-                            <option value="Aluguel">Aluguel</option>
-                            <option value="Gasolina">Gasolina</option>
-                            <option value="Almoço/Jantar">Almoço/Jantar</option>
-                            <option value="Transporte">Transporte</option>
-                            <option value="Saúde">Saúde</option>
-                            <option value="Lazer">Lazer</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="expenseDescription">Descrição:</label>
-                        <input type="text" id="expenseDescription" placeholder="Ex: Compra no supermercado">
-                    </div>
-                    <div class="form-group">
-                        <label for="expenseValue">Valor (R$):</label>
-                        <input type="number" id="expenseValue" placeholder="0,00" step="0.01" min="0">
-                    </div>
-                    <button class="btn btn-success" id="addExpenseBtn">Adicionar Gasto</button>
-                </section>
-                
-                <section class="section">
-                    <h2><i class="fas fa-chart-pie"></i> Resumo Financeiro</h2>
-                    <div class="summary-cards">
-                        <div class="card">
-                            <h3>Total de Gastos</h3>
-                            <p id="totalExpenses">R$ 0,00</p>
-                        </div>
-                        <div class="card">
-                            <h3>Maior Gasto</h3>
-                            <p id="highestExpense">R$ 0,00</p>
-                        </div>
-                        <div class="card">
-                            <h3>Gasto Médio</h3>
-                            <p id="averageExpense">R$ 0,00</p>
-                        </div>
-                    </div>
-                    
-                    <div class="filters">
-                        <div class="filter-item">
-                            <label for="monthFilter">Mês:</label>
-                            <select id="monthFilter">
-                                <option value="">Todos os meses</option>
-                                <option value="01">Janeiro</option>
-                                <option value="02">Fevereiro</option>
-                                <option value="03">Março</option>
-                                <option value="04">Abril</option>
-                                <option value="05">Maio</option>
-                                <option value="06">Junho</option>
-                                <option value="07">Julho</option>
-                                <option value="08">Agosto</option>
-                                <option value="09">Setembro</option>
-                                <option value="10">Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
-                        </div>
-                        <div class="filter-item">
-                            <label for="yearFilter">Ano:</label>
-                            <select id="yearFilter">
-                                <option value="">Todos os anos</option>
-                                <option value="2023">2023</option>
-                                <option value="2024">2024</option>
-                            </select>
-                        </div>
-                    </div>
-                </section>
+        <!-- Abas de navegação -->
+        <div class="tabs">
+            <div class="tab active" data-tab="add">
+                <i class="fas fa-plus-circle"></i>
+                <span class="tab-text">Adicionar</span>
+            </div>
+            <div class="tab" data-tab="today">
+                <i class="fas fa-chart-pie"></i>
+                <span class="tab-text">Hoje</span>
+            </div>
+            <div class="tab" data-tab="history">
+                <i class="fas fa-receipt"></i>
+                <span class="tab-text">Histórico</span>
+            </div>
+            <div class="tab" data-tab="limits">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="tab-text">Limites</span>
+            </div>
+        </div>
+        
+        <!-- Conteúdo da aba Adicionar -->
+        <div class="tab-content active" id="add-tab">
+            <div class="section">
+                <h2><i class="fas fa-plus-circle"></i> Adicionar Gasto</h2>
+                <div class="form-group">
+                    <label for="expenseDate">Data:</label>
+                    <input type="date" id="expenseDate">
+                </div>
+                <div class="form-group">
+                    <label for="expenseCategory">Categoria:</label>
+                    <select id="expenseCategory">
+                        <option value="Supermercado">Supermercado</option>
+                        <option value="Aluguel">Aluguel</option>
+                        <option value="Gasolina">Gasolina</option>
+                        <option value="Almoço/Jantar">Almoço/Jantar</option>
+                        <option value="Transporte">Transporte</option>
+                        <option value="Saúde">Saúde</option>
+                        <option value="Lazer">Lazer</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expenseDescription">Descrição:</label>
+                    <input type="text" id="expenseDescription" placeholder="Ex: Compra no supermercado">
+                </div>
+                <div class="form-group">
+                    <label for="expenseValue">Valor (R$):</label>
+                    <input type="number" id="expenseValue" placeholder="0,00" step="0.01" min="0">
+                </div>
+                <button class="btn btn-success" id="addExpenseBtn">Adicionar Gasto</button>
             </div>
             
-            <div class="right-column">
-                <section class="section">
-                    <h2><i class="fas fa-tachometer-alt"></i> Limite Diário</h2>
-                    <div class="form-group">
-                        <label for="dailyLimit">Definir Limite Diário (R$):</label>
-                        <input type="number" id="dailyLimit" placeholder="0,00" step="0.01" min="0">
-                    </div>
-                    <button class="btn" id="setLimitBtn">Definir Limite</button>
-                    
-                    <div id="limitStatus" style="margin-top: 20px;">
-                        <div class="card limit-card" id="limitCard">
-                            <h3>Gasto Hoje</h3>
-                            <p id="todayExpenses">R$ 0,00</p>
-                            <p id="limitText">Limite: R$ 0,00</p>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress" id="limitProgress" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text" id="progressText">0% do limite</div>
-                    </div>
-                </section>
+            <div class="section">
+                <h2><i class="fas fa-info-circle"></i> Como usar</h2>
+                <p>Preencha os dados do seu gasto e clique em "Adicionar Gasto".</p>
+                <p>Use as outras abas para ver seus gastos diários, histórico e definir limites.</p>
+            </div>
+        </div>
+        
+        <!-- Conteúdo da aba Hoje -->
+        <div class="tab-content" id="today-tab">
+            <div class="section">
+                <h2><i class="fas fa-tachometer-alt"></i> Limite Diário</h2>
+                <div class="form-group">
+                    <label for="dailyLimit">Definir Limite Diário (R$):</label>
+                    <input type="number" id="dailyLimit" placeholder="0,00" step="0.01" min="0">
+                </div>
+                <button class="btn" id="setLimitBtn">Definir Limite</button>
                 
-                <section class="section">
-                    <h2><i class="fas fa-receipt"></i> Gastos Recentes</h2>
-                    <div id="expensesTableContainer">
-                        <table id="expensesTable">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Categoria</th>
-                                    <th>Descrição</th>
-                                    <th>Valor (R$)</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="expensesTableBody">
-                                <tr>
-                                    <td colspan="5" style="text-align: center;">Nenhum gasto registrado.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div id="limitStatus" style="margin-top: 20px;">
+                    <div class="card limit-card" id="limitCard">
+                        <h3>Gasto Hoje</h3>
+                        <p id="todayExpenses">R$ 0,00</p>
+                        <p id="limitText">Limite: R$ 0,00</p>
                     </div>
-                    <div class="actions">
-                        <button class="btn btn-danger" id="clearAllBtn">Limpar Tudo</button>
-                        <button class="btn" id="exportBtn">Exportar</button>
+                    <div class="progress-bar">
+                        <div class="progress" id="limitProgress" style="width: 0%"></div>
                     </div>
-                </section>
+                    <div class="progress-text" id="progressText">0% do limite</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2><i class="fas fa-chart-pie"></i> Resumo de Hoje</h2>
+                <div class="summary-cards">
+                    <div class="card">
+                        <h3>Total de Gastos</h3>
+                        <p id="totalExpenses">R$ 0,00</p>
+                    </div>
+                    <div class="card">
+                        <h3>Maior Gasto</h3>
+                        <p id="highestExpense">R$ 0,00</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2><i class="fas fa-receipt"></i> Gastos de Hoje</h2>
+                <div class="table-container">
+                    <table id="todayExpensesTable">
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th>Valor (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todayExpensesBody">
+                            <tr>
+                                <td colspan="3" style="text-align: center;">
+                                    <div class="empty-state">
+                                        <i class="fas fa-receipt"></i>
+                                        <p>Nenhum gasto hoje</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Conteúdo da aba Histórico -->
+        <div class="tab-content" id="history-tab">
+            <div class="section">
+                <h2><i class="fas fa-filter"></i> Filtros</h2>
+                <div class="form-group">
+                    <label for="monthFilter">Mês:</label>
+                    <select id="monthFilter">
+                        <option value="">Todos os meses</option>
+                        <option value="01">Janeiro</option>
+                        <option value="02">Fevereiro</option>
+                        <option value="03">Março</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Maio</option>
+                        <option value="06">Junho</option>
+                        <option value="07">Julho</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="yearFilter">Ano:</label>
+                    <select id="yearFilter">
+                        <option value="">Todos os anos</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="categoryFilter">Categoria:</label>
+                    <select id="categoryFilter">
+                        <option value="">Todas as categorias</option>
+                        <option value="Supermercado">Supermercado</option>
+                        <option value="Aluguel">Aluguel</option>
+                        <option value="Gasolina">Gasolina</option>
+                        <option value="Almoço/Jantar">Almoço/Jantar</option>
+                        <option value="Transporte">Transporte</option>
+                        <option value="Saúde">Saúde</option>
+                        <option value="Lazer">Lazer</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2><i class="fas fa-history"></i> Histórico de Gastos</h2>
+                <div class="table-container">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th>Valor (R$)</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center;">
+                                    <div class="empty-state">
+                                        <i class="fas fa-receipt"></i>
+                                        <p>Nenhum gasto registrado</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn btn-danger" id="clearAllBtn">Limpar Tudo</button>
+                    <button class="btn" id="exportBtn">Exportar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Conteúdo da aba Limites -->
+        <div class="tab-content" id="limits-tab">
+            <div class="section">
+                <h2><i class="fas fa-tachometer-alt"></i> Limites por Categoria</h2>
+                <p>Defina limites mensais para cada categoria de gastos:</p>
+                
+                <div class="form-group">
+                    <label for="supermarketLimit">Supermercado (R$):</label>
+                    <input type="number" id="supermarketLimit" placeholder="0,00" step="0.01" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="foodLimit">Almoço/Jantar (R$):</label>
+                    <input type="number" id="foodLimit" placeholder="0,00" step="0.01" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="transportLimit">Transporte (R$):</label>
+                    <input type="number" id="transportLimit" placeholder="0,00" step="0.01" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="leisureLimit">Lazer (R$):</label>
+                    <input type="number" id="leisureLimit" placeholder="0,00" step="0.01" min="0">
+                </div>
+                
+                <button class="btn" id="saveLimitsBtn">Salvar Limites</button>
+            </div>
+            
+            <div class="section">
+                <h2><i class="fas fa-chart-pie"></i> Resumo dos Limites</h2>
+                <div id="limitsSummary">
+                    <p>Nenhum limite definido ainda.</p>
+                </div>
             </div>
         </div>
     </div>
+    
+    <div class="safe-area-bottom"></div>
+    
+    <div class="toast" id="toast"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Elementos da interface
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
             const expenseDate = document.getElementById('expenseDate');
             const expenseCategory = document.getElementById('expenseCategory');
             const expenseDescription = document.getElementById('expenseDescription');
@@ -470,13 +604,16 @@
             const setLimitBtn = document.getElementById('setLimitBtn');
             const monthFilter = document.getElementById('monthFilter');
             const yearFilter = document.getElementById('yearFilter');
+            const categoryFilter = document.getElementById('categoryFilter');
             const clearAllBtn = document.getElementById('clearAllBtn');
             const exportBtn = document.getElementById('exportBtn');
-            const expensesTableBody = document.getElementById('expensesTableBody');
+            const saveLimitsBtn = document.getElementById('saveLimitsBtn');
+            
+            const todayExpensesBody = document.getElementById('todayExpensesBody');
+            const historyBody = document.getElementById('historyBody');
             
             const totalExpensesElement = document.getElementById('totalExpenses');
             const highestExpenseElement = document.getElementById('highestExpense');
-            const averageExpenseElement = document.getElementById('averageExpense');
             const todayExpensesElement = document.getElementById('todayExpenses');
             const limitTextElement = document.getElementById('limitText');
             const limitProgressElement = document.getElementById('limitProgress');
@@ -485,23 +622,55 @@
             
             let expensesData = [];
             let dailyLimitValue = 0;
+            let categoryLimits = {};
             
             // Inicializar data atual
             const today = new Date();
             const todayFormatted = today.toISOString().split('T')[0];
             expenseDate.value = todayFormatted;
             
+            // Configurar ano atual no filtro
+            const currentYear = today.getFullYear().toString();
+            const yearOption = document.querySelector(`#yearFilter option[value="${currentYear}"]`);
+            if (yearOption) {
+                yearOption.selected = true;
+            } else {
+                // Adicionar o ano atual se não existir
+                const newOption = document.createElement('option');
+                newOption.value = currentYear;
+                newOption.textContent = currentYear;
+                yearFilter.appendChild(newOption);
+                newOption.selected = true;
+            }
+            
             // Carregar dados do localStorage
             loadFromLocalStorage();
             updateUI();
             
-            // Event Listeners
+            // Event Listeners para abas
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Remover classe active de todas as abas e conteúdos
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // Adicionar classe active à aba e conteúdo clicados
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Event Listeners para funcionalidades
             addExpenseBtn.addEventListener('click', addExpense);
             setLimitBtn.addEventListener('click', setDailyLimit);
             monthFilter.addEventListener('change', updateUI);
             yearFilter.addEventListener('change', updateUI);
+            categoryFilter.addEventListener('change', updateUI);
             clearAllBtn.addEventListener('click', clearAllData);
             exportBtn.addEventListener('click', exportData);
+            saveLimitsBtn.addEventListener('click', saveCategoryLimits);
             
             // Função para adicionar gasto
             function addExpense() {
@@ -511,7 +680,7 @@
                 const value = parseFloat(expenseValue.value);
                 
                 if (!date || !category || !description || isNaN(value) || value <= 0) {
-                    alert('Por favor, preencha todos os campos corretamente.');
+                    showToast('Por favor, preencha todos os campos corretamente.');
                     return;
                 }
                 
@@ -531,6 +700,9 @@
                 expenseDescription.value = '';
                 expenseValue.value = '';
                 
+                // Mostrar mensagem de sucesso
+                showToast('Gasto adicionado com sucesso!');
+                
                 // Focar no campo de descrição
                 expenseDescription.focus();
             }
@@ -540,13 +712,28 @@
                 const limit = parseFloat(dailyLimit.value);
                 
                 if (isNaN(limit) || limit <= 0) {
-                    alert('Por favor, informe um valor válido para o limite diário.');
+                    showToast('Por favor, informe um valor válido para o limite diário.');
                     return;
                 }
                 
                 dailyLimitValue = limit;
                 localStorage.setItem('dailyLimit', dailyLimitValue);
                 updateLimitUI();
+                showToast('Limite diário definido com sucesso!');
+            }
+            
+            // Função para salvar limites por categoria
+            function saveCategoryLimits() {
+                categoryLimits = {
+                    Supermercado: parseFloat(document.getElementById('supermarketLimit').value) || 0,
+                    'Almoço/Jantar': parseFloat(document.getElementById('foodLimit').value) || 0,
+                    Transporte: parseFloat(document.getElementById('transportLimit').value) || 0,
+                    Lazer: parseFloat(document.getElementById('leisureLimit').value) || 0
+                };
+                
+                localStorage.setItem('categoryLimits', JSON.stringify(categoryLimits));
+                updateLimitsSummary();
+                showToast('Limites por categoria salvos com sucesso!');
             }
             
             // Função para carregar dados do localStorage
@@ -561,6 +748,15 @@
                     dailyLimitValue = parseFloat(storedLimit);
                     dailyLimit.value = dailyLimitValue;
                 }
+                
+                const storedCategoryLimits = localStorage.getItem('categoryLimits');
+                if (storedCategoryLimits) {
+                    categoryLimits = JSON.parse(storedCategoryLimits);
+                    document.getElementById('supermarketLimit').value = categoryLimits.Supermercado || '';
+                    document.getElementById('foodLimit').value = categoryLimits['Almoço/Jantar'] || '';
+                    document.getElementById('transportLimit').value = categoryLimits.Transporte || '';
+                    document.getElementById('leisureLimit').value = categoryLimits.Lazer || '';
+                }
             }
             
             // Função para salvar dados no localStorage
@@ -570,18 +766,53 @@
             
             // Função para atualizar a interface
             function updateUI() {
-                updateExpensesTable();
+                updateTodayExpenses();
+                updateHistoryTable();
                 updateSummary();
                 updateLimitUI();
+                updateLimitsSummary();
             }
             
-            // Função para atualizar a tabela de gastos
-            function updateExpensesTable() {
+            // Função para atualizar gastos de hoje
+            function updateTodayExpenses() {
+                const todayExpenses = expensesData.filter(expense => expense.date === todayFormatted);
+                
+                todayExpensesBody.innerHTML = '';
+                
+                if (todayExpenses.length === 0) {
+                    todayExpensesBody.innerHTML = `
+                        <tr>
+                            <td colspan="3" style="text-align: center;">
+                                <div class="empty-state">
+                                    <i class="fas fa-receipt"></i>
+                                    <p>Nenhum gasto hoje</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    todayExpenses.forEach(expense => {
+                        const row = document.createElement('tr');
+                        
+                        row.innerHTML = `
+                            <td>${expense.category}</td>
+                            <td>${expense.description}</td>
+                            <td class="negative">R$ ${expense.value.toFixed(2)}</td>
+                        `;
+                        
+                        todayExpensesBody.appendChild(row);
+                    });
+                }
+            }
+            
+            // Função para atualizar a tabela de histórico
+            function updateHistoryTable() {
                 const month = monthFilter.value;
                 const year = yearFilter.value;
+                const category = categoryFilter.value;
                 
                 // Filtrar dados
-                let filteredData = expensesData;
+                let filteredData = [...expensesData];
                 
                 if (month) {
                     filteredData = filteredData.filter(expense => {
@@ -597,16 +828,25 @@
                     });
                 }
                 
+                if (category) {
+                    filteredData = filteredData.filter(expense => expense.category === category);
+                }
+                
                 // Ordenar por data (mais recente primeiro)
                 filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
                 
                 // Atualizar tabela
-                expensesTableBody.innerHTML = '';
+                historyBody.innerHTML = '';
                 
                 if (filteredData.length === 0) {
-                    expensesTableBody.innerHTML = `
+                    historyBody.innerHTML = `
                         <tr>
-                            <td colspan="5" style="text-align: center;">Nenhum gasto encontrado com os filtros selecionados.</td>
+                            <td colspan="5" style="text-align: center;">
+                                <div class="empty-state">
+                                    <i class="fas fa-receipt"></i>
+                                    <p>Nenhum gasto encontrado</p>
+                                </div>
+                            </td>
                         </tr>
                     `;
                 } else {
@@ -621,49 +861,29 @@
                             <td>${formattedDate}</td>
                             <td>${expense.category}</td>
                             <td>${expense.description}</td>
-                            <td class="${expense.value < 0 ? 'negative' : 'positive'}">R$ ${expense.value.toFixed(2)}</td>
+                            <td class="negative">R$ ${expense.value.toFixed(2)}</td>
                             <td>
-                                <button class="btn btn-danger" onclick="deleteExpense(${expense.id})">
+                                <button class="btn btn-danger" onclick="deleteExpense(${expense.id})" style="padding: 5px 10px; font-size: 0.8rem;">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
                         `;
                         
-                        expensesTableBody.appendChild(row);
+                        historyBody.appendChild(row);
                     });
                 }
             }
             
             // Função para atualizar o resumo financeiro
             function updateSummary() {
-                const month = monthFilter.value;
-                const year = yearFilter.value;
-                
-                // Filtrar dados
-                let filteredData = expensesData;
-                
-                if (month) {
-                    filteredData = filteredData.filter(expense => {
-                        const expenseMonth = expense.date.split('-')[1];
-                        return expenseMonth === month;
-                    });
-                }
-                
-                if (year) {
-                    filteredData = filteredData.filter(expense => {
-                        const expenseYear = expense.date.split('-')[0];
-                        return expenseYear === year;
-                    });
-                }
+                const todayExpenses = expensesData.filter(expense => expense.date === todayFormatted);
                 
                 // Calcular totais
-                const total = filteredData.reduce((sum, expense) => sum + expense.value, 0);
-                const highest = filteredData.length > 0 ? Math.max(...filteredData.map(expense => expense.value)) : 0;
-                const average = filteredData.length > 0 ? total / filteredData.length : 0;
+                const total = todayExpenses.reduce((sum, expense) => sum + expense.value, 0);
+                const highest = todayExpenses.length > 0 ? Math.max(...todayExpenses.map(expense => expense.value)) : 0;
                 
                 totalExpensesElement.textContent = `R$ ${total.toFixed(2)}`;
                 highestExpenseElement.textContent = `R$ ${highest.toFixed(2)}`;
-                averageExpenseElement.textContent = `R$ ${average.toFixed(2)}`;
             }
             
             // Função para atualizar a UI do limite diário
@@ -699,12 +919,56 @@
                 }
             }
             
+            // Função para atualizar o resumo dos limites
+            function updateLimitsSummary() {
+                const limitsSummary = document.getElementById('limitsSummary');
+                
+                if (Object.keys(categoryLimits).length === 0) {
+                    limitsSummary.innerHTML = '<p>Nenhum limite definido ainda.</p>';
+                    return;
+                }
+                
+                let html = '';
+                for (const [category, limit] of Object.entries(categoryLimits)) {
+                    if (limit > 0) {
+                        // Calcular gastos do mês atual para esta categoria
+                        const currentMonth = new Date().getMonth() + 1;
+                        const monthStr = currentMonth.toString().padStart(2, '0');
+                        const currentYear = new Date().getFullYear().toString();
+                        
+                        const monthlyExpenses = expensesData
+                            .filter(expense => {
+                                const expenseDate = new Date(expense.date);
+                                return expenseDate.getMonth() + 1 === currentMonth && 
+                                       expenseDate.getFullYear().toString() === currentYear &&
+                                       expense.category === category;
+                            })
+                            .reduce((sum, expense) => sum + expense.value, 0);
+                        
+                        const percentage = (monthlyExpenses / limit) * 100;
+                        
+                        html += `
+                            <div style="margin-bottom: 15px;">
+                                <p><strong>${category}:</strong> R$ ${monthlyExpenses.toFixed(2)} / R$ ${limit.toFixed(2)}</p>
+                                <div class="progress-bar">
+                                    <div class="progress ${percentage >= 100 ? 'danger' : percentage >= 80 ? 'warning' : ''}" style="width: ${Math.min(percentage, 100)}%"></div>
+                                </div>
+                                <div class="progress-text">${percentage.toFixed(0)}% do limite</div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                limitsSummary.innerHTML = html || '<p>Nenhum limite definido ainda.</p>';
+            }
+            
             // Função para deletar um gasto
             function deleteExpense(id) {
                 if (confirm('Tem certeza que deseja excluir este gasto?')) {
                     expensesData = expensesData.filter(expense => expense.id !== id);
                     saveToLocalStorage();
                     updateUI();
+                    showToast('Gasto excluído com sucesso!');
                 }
             }
             
@@ -714,36 +978,34 @@
                     expensesData = [];
                     dailyLimitValue = 0;
                     dailyLimit.value = '';
+                    categoryLimits = {};
                     localStorage.removeItem('expensesData');
                     localStorage.removeItem('dailyLimit');
+                    localStorage.removeItem('categoryLimits');
                     updateUI();
+                    showToast('Todos os dados foram limpos!');
                 }
             }
             
             // Função para exportar dados
             function exportData() {
-                // Criar um workbook
-                const wb = XLSX.utils.book_new();
+                if (expensesData.length === 0) {
+                    showToast('Não há dados para exportar.');
+                    return;
+                }
                 
-                // Preparar dados para exportação
-                const dataToExport = expensesData.map(expense => ({
-                    'Data': expense.date,
-                    'Categoria': expense.category,
-                    'Descrição': expense.description,
-                    'Valor (R$)': expense.value
-                }));
+                // Criar conteúdo CSV
+                let csvContent = "Data,Categoria,Descrição,Valor\n";
                 
-                // Adicionar uma worksheet
-                const ws = XLSX.utils.json_to_sheet(dataToExport);
-                XLSX.utils.book_append_sheet(wb, ws, 'Gastos');
+                expensesData.forEach(expense => {
+                    csvContent += `"${expense.date}","${expense.category}","${expense.description}",${expense.value}\n`;
+                });
                 
-                // Exportar para XLSX
-                XLSX.writeFile(wb, 'controle_gastos.xlsx');
-            }
-            
-            // Tornar a função deleteExpense global para que possa ser chamada pelo onclick
-            window.deleteExpense = deleteExpense;
-        });
-    </script>
-</body>
-</html>
+                // Criar blob e link para download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                const date = new Date().toISOString().split('T')[0];
+                
+                link.setAttribute("href", url);
+                link.setAttribute("download", `gastos_${
