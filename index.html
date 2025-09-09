@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Gastos Pessoais</title>
+    <title>Controle de Gastos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -29,65 +29,45 @@
             padding: 0;
         }
         
-        header {
-            text-align: center;
-            padding: 20px 15px;
-            background: linear-gradient(135deg, #2c3e50, #4a6491);
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        
-        .subtitle {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-        
         /* Abas de navegação */
         .tabs {
             display: flex;
             background: white;
-            border-bottom: 1px solid #ddd;
-            position: sticky;
-            top: 84px;
-            z-index: 90;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            padding: 5px 0;
         }
         
         .tab {
             flex: 1;
             text-align: center;
-            padding: 15px 0;
+            padding: 12px 0;
             font-weight: 600;
-            color: #4a6491;
-            border-bottom: 3px solid transparent;
+            color: #7f8c8d;
             transition: all 0.3s;
             cursor: pointer;
+            font-size: 0.8rem;
         }
         
         .tab.active {
-            border-bottom: 3px solid #4a6491;
-            color: #2c3e50;
+            color: #4a6491;
         }
         
         .tab i {
-            margin-right: 5px;
-            font-size: 1.1rem;
+            display: block;
+            margin: 0 auto 5px;
+            font-size: 1.2rem;
         }
         
         /* Conteúdo das abas */
         .tab-content {
             display: none;
-            padding: 20px 15px;
-            min-height: calc(100vh - 140px);
+            padding: 15px;
+            padding-bottom: 70px; /* Espaço para a barra de navegação */
         }
         
         .tab-content.active {
@@ -324,7 +304,7 @@
         /* Toast notification */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
             background-color: #333;
@@ -335,6 +315,8 @@
             opacity: 0;
             transition: opacity 0.3s;
             font-size: 0.9rem;
+            max-width: 80%;
+            text-align: center;
         }
         
         /* Estilo para botões pequenos */
@@ -342,36 +324,41 @@
             padding: 5px 10px;
             font-size: 0.8rem;
         }
+        
+        .currency-info {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        /* Indicador de aba ativa */
+        .tab-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background-color: #4a6491;
+            transition: all 0.3s;
+            width: 25%;
+        }
+        
+        /* Status bar */
+        .status-bar {
+            height: env(safe-area-inset-top);
+            background-color: #2c3e50;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
+    <div class="status-bar"></div>
     <div class="safe-area-top"></div>
     <div class="container">
-        <header>
-            <h1>Controle de Gastos Pessoais</h1>
-            <p class="subtitle">Acompanhe seus gastos e defina limites</p>
-        </header>
-        
-        <!-- Abas de navegação -->
-        <div class="tabs">
-            <div class="tab active" data-tab="add">
-                <i class="fas fa-plus-circle"></i>
-                <span class="tab-text">Adicionar</span>
-            </div>
-            <div class="tab" data-tab="today">
-                <i class="fas fa-chart-pie"></i>
-                <span class="tab-text">Hoje</span>
-            </div>
-            <div class="tab" data-tab="history">
-                <i class="fas fa-receipt"></i>
-                <span class="tab-text">Histórico</span>
-            </div>
-            <div class="tab" data-tab="limits">
-                <i class="fas fa-tachometer-alt"></i>
-                <span class="tab-text">Limites</span>
-            </div>
-        </div>
-        
         <!-- Conteúdo da aba Adicionar -->
         <div class="tab-content active" id="add-tab">
             <div class="section">
@@ -398,8 +385,8 @@
                     <input type="text" id="expenseDescription" placeholder="Ex: Compra no supermercado">
                 </div>
                 <div class="form-group">
-                    <label for="expenseValue">Valor (R$):</label>
-                    <input type="number" id="expenseValue" placeholder="0,00" step="0.01" min="0">
+                    <label for="expenseValue">Valor (US$):</label>
+                    <input type="number" id="expenseValue" placeholder="0.00" step="0.01" min="0">
                 </div>
                 <button class="btn btn-success" id="addExpenseBtn">Adicionar Gasto</button>
             </div>
@@ -416,16 +403,16 @@
             <div class="section">
                 <h2><i class="fas fa-tachometer-alt"></i> Limite Diário</h2>
                 <div class="form-group">
-                    <label for="dailyLimit">Definir Limite Diário (R$):</label>
-                    <input type="number" id="dailyLimit" placeholder="0,00" step="0.01" min="0">
+                    <label for="dailyLimit">Definir Limite Diário (US$):</label>
+                    <input type="number" id="dailyLimit" placeholder="0.00" step="0.01" min="0">
                 </div>
                 <button class="btn" id="setLimitBtn">Definir Limite</button>
                 
                 <div id="limitStatus" style="margin-top: 20px;">
                     <div class="card limit-card" id="limitCard">
                         <h3>Gasto Hoje</h3>
-                        <p id="todayExpenses">R$ 0,00</p>
-                        <p id="limitText">Limite: R$ 0,00</p>
+                        <p id="todayExpenses">US$ 0.00</p>
+                        <p id="limitText">Limite: US$ 0.00</p>
                     </div>
                     <div class="progress-bar">
                         <div class="progress" id="limitProgress" style="width: 0%"></div>
@@ -439,11 +426,11 @@
                 <div class="summary-cards">
                     <div class="card">
                         <h3>Total de Gastos</h3>
-                        <p id="totalExpenses">R$ 0,00</p>
+                        <p id="totalExpenses">US$ 0.00</p>
                     </div>
                     <div class="card">
                         <h3>Maior Gasto</h3>
-                        <p id="highestExpense">R$ 0,00</p>
+                        <p id="highestExpense">US$ 0.00</p>
                     </div>
                 </div>
             </div>
@@ -456,7 +443,7 @@
                             <tr>
                                 <th>Categoria</th>
                                 <th>Descrição</th>
-                                <th>Valor (R$)</th>
+                                <th>Valor (US$)</th>
                             </tr>
                         </thead>
                         <tbody id="todayExpensesBody">
@@ -530,7 +517,7 @@
                                 <th>Data</th>
                                 <th>Categoria</th>
                                 <th>Descrição</th>
-                                <th>Valor (R$)</th>
+                                <th>Valor (US$)</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -561,23 +548,23 @@
                 <p>Defina limites mensais para cada categoria de gastos:</p>
                 
                 <div class="form-group">
-                    <label for="supermarketLimit">Supermercado (R$):</label>
-                    <input type="number" id="supermarketLimit" placeholder="0,00" step="0.01" min="0">
+                    <label for="supermarketLimit">Supermercado (US$):</label>
+                    <input type="number" id="supermarketLimit" placeholder="0.00" step="0.01" min="0">
                 </div>
                 
                 <div class="form-group">
-                    <label for="foodLimit">Almoço/Jantar (R$):</label>
-                    <input type="number" id="foodLimit" placeholder="0,00" step="0.01" min="0">
+                    <label for="foodLimit">Almoço/Jantar (US$):</label>
+                    <input type="number" id="foodLimit" placeholder="0.00" step="0.01" min="0">
                 </div>
                 
                 <div class="form-group">
-                    <label for="transportLimit">Transporte (R$):</label>
-                    <input type="number" id="transportLimit" placeholder="0,00" step="0.01" min="0">
+                    <label for="transportLimit">Transporte (US$):</label>
+                    <input type="number" id="transportLimit" placeholder="0.00" step="0.01" min="0">
                 </div>
                 
                 <div class="form-group">
-                    <label for="leisureLimit">Lazer (R$):</label>
-                    <input type="number" id="leisureLimit" placeholder="0,00" step="0.01" min="0">
+                    <label for="leisureLimit">Lazer (US$):</label>
+                    <input type="number" id="leisureLimit" placeholder="0.00" step="0.01" min="0">
                 </div>
                 
                 <button class="btn" id="saveLimitsBtn">Salvar Limites</button>
@@ -592,6 +579,27 @@
         </div>
     </div>
     
+    <!-- Barra de navegação inferior -->
+    <div class="tabs">
+        <div class="tab-indicator" id="tabIndicator"></div>
+        <div class="tab active" data-tab="add">
+            <i class="fas fa-plus-circle"></i>
+            <span class="tab-text">Adicionar</span>
+        </div>
+        <div class="tab" data-tab="today">
+            <i class="fas fa-chart-pie"></i>
+            <span class="tab-text">Hoje</span>
+        </div>
+        <div class="tab" data-tab="history">
+            <i class="fas fa-receipt"></i>
+            <span class="tab-text">Histórico</span>
+        </div>
+        <div class="tab" data-tab="limits">
+            <i class="fas fa-tachometer-alt"></i>
+            <span class="tab-text">Limites</span>
+        </div>
+    </div>
+    
     <div class="safe-area-bottom"></div>
     
     <div class="toast" id="toast"></div>
@@ -601,6 +609,7 @@
             // Elementos da interface
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
+            const tabIndicator = document.getElementById('tabIndicator');
             
             const expenseDate = document.getElementById('expenseDate');
             const expenseCategory = document.getElementById('expenseCategory');
@@ -660,6 +669,7 @@
             // Carregar dados do localStorage
             loadFromLocalStorage();
             updateUI();
+            updateTabIndicator();
             
             // Event Listeners para abas
             tabs.forEach(tab => {
@@ -669,8 +679,18 @@
                     tabContents.forEach(tc => tc.classList.remove('active'));
                     tab.classList.add('active');
                     document.getElementById(`${tabId}-tab`).classList.add('active');
+                    updateTabIndicator();
                 });
             });
+            
+            // Atualizar indicador de aba ativa
+            function updateTabIndicator() {
+                const activeTab = document.querySelector('.tab.active');
+                const tabWidth = 100 / tabs.length;
+                const activeIndex = Array.from(tabs).indexOf(activeTab);
+                tabIndicator.style.width = `${tabWidth}%`;
+                tabIndicator.style.left = `${activeIndex * tabWidth}%`;
+            }
             
             // Event Listeners para funcionalidades
             addExpenseBtn.addEventListener('click', addExpense);
@@ -797,7 +817,7 @@
                         row.innerHTML = `
                             <td>${expense.category}</td>
                             <td>${expense.description}</td>
-                            <td class="negative">R$ ${expense.value.toFixed(2)}</td>
+                            <td class="negative">US$ ${expense.value.toFixed(2)}</td>
                         `;
                         todayExpensesBody.appendChild(row);
                     });
@@ -841,7 +861,7 @@
                             <td>${formattedDate}</td>
                             <td>${expense.category}</td>
                             <td>${expense.description}</td>
-                            <td class="negative">R$ ${expense.value.toFixed(2)}</td>
+                            <td class="negative">US$ ${expense.value.toFixed(2)}</td>
                             <td>
                                 <button class="btn btn-danger btn-small" onclick="deleteExpense(${expense.id})">
                                     <i class="fas fa-trash"></i>
@@ -858,8 +878,8 @@
                 const todayExpenses = expensesData.filter(expense => expense.date === todayFormatted);
                 const total = todayExpenses.reduce((sum, expense) => sum + expense.value, 0);
                 const highest = todayExpenses.length > 0 ? Math.max(...todayExpenses.map(expense => expense.value)) : 0;
-                totalExpensesElement.textContent = `R$ ${total.toFixed(2)}`;
-                highestExpenseElement.textContent = `R$ ${highest.toFixed(2)}`;
+                totalExpensesElement.textContent = `US$ ${total.toFixed(2)}`;
+                highestExpenseElement.textContent = `US$ ${highest.toFixed(2)}`;
             }
             
             // Função para atualizar a UI do limite diário
@@ -867,8 +887,8 @@
                 const todayExpenses = expensesData
                     .filter(expense => expense.date === todayFormatted)
                     .reduce((sum, expense) => sum + expense.value, 0);
-                todayExpensesElement.textContent = `R$ ${todayExpenses.toFixed(2)}`;
-                limitTextElement.textContent = `Limite: R$ ${dailyLimitValue.toFixed(2)}`;
+                todayExpensesElement.textContent = `US$ ${todayExpenses.toFixed(2)}`;
+                limitTextElement.textContent = `Limite: US$ ${dailyLimitValue.toFixed(2)}`;
                 let percentage = 0;
                 if (dailyLimitValue > 0) {
                     percentage = (todayExpenses / dailyLimitValue) * 100;
@@ -912,7 +932,7 @@
                         const percentage = (monthlyExpenses / limit) * 100;
                         html += `
                             <div style="margin-bottom: 15px;">
-                                <p><strong>${category}:</strong> R$ ${monthlyExpenses.toFixed(2)} / R$ ${limit.toFixed(2)}</p>
+                                <p><strong>${category}:</strong> US$ ${monthlyExpenses.toFixed(2)} / US$ ${limit.toFixed(2)}</p>
                                 <div class="progress-bar">
                                     <div class="progress ${percentage >= 100 ? 'danger' : percentage >= 80 ? 'warning' : ''}" style="width: ${Math.min(percentage, 100)}%"></div>
                                 </div>
@@ -962,7 +982,7 @@
                 // Usar ponto e vírgula como separador de colunas
                 let csvContent = "Data;Categoria;Descrição;Valor\n";
                 expensesData.forEach(expense => {
-                    csvContent += `"${expense.date}";"${expense.category}";"${expense.description}";${expense.value.toFixed(2).replace('.', ',')}\n`;
+                    csvContent += `"${expense.date}";"${expense.category}";"${expense.description}";${expense.value.toFixed(2)}\n`;
                 });
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
